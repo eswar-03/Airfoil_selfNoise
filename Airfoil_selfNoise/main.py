@@ -1,69 +1,53 @@
 import streamlit as st
 import joblib
 import numpy as np
+import os
 
-# Load trained model and scaler
-model = joblib.load("model.pkl")
-scaler = joblib.load("scaler.pkl")
+# Get the folder where main.py is located
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# Prediction function
+# Load model and scaler
+model = joblib.load(os.path.join(BASE_DIR, "model.pkl"))
+scaler = joblib.load(os.path.join(BASE_DIR, "scaler.pkl"))
+
+
 def predict_sspl(f, alpha, c, U_infinity, delta):
     input_data = np.array([[f, alpha, c, U_infinity, delta]])
 
-    # Scale input
     scaled = scaler.transform(input_data)
 
-    # Predict
     prediction = model.predict(scaled)
 
     return round(float(prediction[0]), 2)
 
 
-# Streamlit page configuration
 st.set_page_config(
     page_title="Airfoil Self-Noise Predictor",
-    page_icon="✈️",
-    layout="centered"
+    page_icon="✈️"
 )
 
-# Title
 st.title("✈️ Airfoil Self-Noise Predictor")
 
 st.write(
-    "Enter the airfoil parameters below to predict "
-    "the Sound Pressure Level (SSPL)."
+    "Enter the airfoil parameters to predict "
+    "Sound Pressure Level (SSPL)."
 )
 
-# Input fields
-f = st.number_input(
-    "Frequency (f)",
-    value=1000.0
-)
-
-alpha = st.number_input(
-    "Angle of Attack (alpha)",
-    value=0.0
-)
-
-c = st.number_input(
-    "Chord Length (c)",
-    value=0.1
-)
-
+f = st.number_input("Frequency (f)", value=1000.0)
+alpha = st.number_input("Angle of Attack (alpha)", value=0.0)
+c = st.number_input("Chord Length (c)", value=0.1)
 U_infinity = st.number_input(
     "Free-stream Velocity (U_infinity)",
     value=50.0
 )
-
 delta = st.number_input(
     "Displacement Thickness (delta)",
     value=0.001
 )
 
-# Prediction button
 if st.button("Predict SSPL"):
 
-    prediction = predict_sspl(
+    result = predict_sspl(
         f,
         alpha,
         c,
@@ -71,4 +55,4 @@ if st.button("Predict SSPL"):
         delta
     )
 
-    st.success(f"Predicted SSPL: {prediction} dB")
+    st.success(f"Predicted SSPL: {result} dB")
